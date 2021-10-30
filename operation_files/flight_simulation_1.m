@@ -41,31 +41,34 @@ Yd_r = 9.17;Ld_a = 1.72; Ld_r = 0.216;
 Nd_a = 0.0;Nd_t = 0.0;
 
 %% 釣り合い速度や重力加速度など
-W0 = 0;%[ft/s]
-U0=293.8;%[ft/s] 
-theta0 = 0.05;%釣り合い時の迎え角[rad]
+W0 = 0;%[ft/s]%機体軸z軸速度
+U0=293.8;%[ft/s]%機体軸x軸速度
+theta0 = 0.05;%釣り合い時の定常pitch角度[rad]
 
 %重力加速度
 %g = 9.8065;%[m/s^2]
 g = 32.168635;%[ft/s^2]
 %% 係数行列
-%縦の運動方程式の係数行列A
+%縦の運動方程式の遷移行列
 A_lat = [Xu,Xa,-W0,-g*cos(theta0);
          Zu/U0,Za/U0,(U0+Zq)/U0,-g*sin(theta0)/U0;
          Mu,Ma,Mq,0;
          0,0,1,0];
 
+%横の運動方程式の遷移行列
 A_lon  = [Yb,(W0+Yp),-(U0-Yr),g*cos(theta0),0;
           Lb_,Lp_,Lr_,0,0;
           Nb_,Np_,Nr_,0,0;
           0,1,tan(theta0),0,0;
           0,0,1/cos(theta0),0,0];
-      
+
+%縦の運動方程式の入力行列
 B_lat = [0,Xd_t;
          Zd_e/U0,Zd_t/U0;
          Md_e,Md_t;
          0,0];
 
+%横の運動方程式の入力行列
 B_lon = [0,Yd_r;
          Ld_a,Ld_r;
          Nd_a,Nd_t;
@@ -89,11 +92,12 @@ t = 0.0:1/step:duration_of_flight;
 x0_lat = [0.0;0.0;0.0;0.0];%縦の初期値[[u,alpha,q,theta]
 %x0_lon = [0.0;0.6;0.4;0.2;0.2];%横の初期値
 x0_lon = [0.0;0.0;0.0;0.0;0.0];%横の初期値[beta,p,r,phi,psi]
-x0_pos = [0;0;1000];%機体の初期位置
+x0_pos = [0;0;1000];%機体の初期位置[ft]
 
 x0 = vertcat(x0_lat,x0_lon,x0_pos);
 
-u_input = [0.1;0.0;0.0;0.0];
+%操舵入力
+u_input = [0.1;0.0;0.0;0.0];%elevator[rad],throttle ,aileron[rad],rudder[rad]
 
 %% 運動方程式を解く
 [t,x] = ode45(@(t,x) dynamical_system(x,t), t, x0);
@@ -104,7 +108,7 @@ figure(1);
 
 plot(t,x(:,1),'-.');
 hold on
-legend("u[ft/s]")
+legend("u[ft/s]")%機体x軸速度の釣り合い速度からの変化
 xlabel("time[s]")
 
 %2枚目
@@ -114,10 +118,10 @@ plot(t,x(:,2),'-.');
 hold on
 plot(t,x(:,5),'-.');
 hold on
-legend('alpha[rad]','beta[rad]')
+legend('alpha[rad]','beta[rad]')%迎え角と横滑り角の変化
 xlabel("time[s]")
 
 %3枚目
 figure(3);
-plot3(x(:,10),x(:,11),x(:,12))
+plot3(x(:,10),x(:,11),x(:,12))%位置の履歴[ft]
 grid on
