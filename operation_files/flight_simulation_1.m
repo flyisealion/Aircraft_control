@@ -6,7 +6,7 @@
 %   
 %   https://butterfly-effect.hatenablog.com/entry/2014/11/18/184904
 %   でのOctaveプログラムを移植したもの。運動方程式はode45で解く
-%
+%   安定微係数は、飛行機力学入門（加藤寬一郎　著）のp109から引用
 %   後学の為の参考サイト
 %   https://jp.mathworks.com/help/matlab/ref/ode45.html
 %   http://www.ina111.org/archives/1057
